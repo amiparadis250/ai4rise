@@ -1,8 +1,8 @@
 "use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Button, Card, Typography, Row, Col, Space, Menu } from 'antd';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button, Card, Typography, Row, Col, Space } from 'antd';
 import {
   MapPin,
   Users,
@@ -16,7 +16,10 @@ import {
   Home,
   Info,
   Book,
-  Contact
+  Contact,
+  Menu,
+  X,
+  CheckCircle
 } from 'lucide-react';
 
 const { Title, Paragraph, Text } = Typography;
@@ -37,11 +40,6 @@ const fadeInRight = {
   visible: { opacity: 1, x: 0 }
 };
 
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: { opacity: 1, scale: 1 }
-};
-
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
@@ -53,10 +51,171 @@ const staggerContainer = {
   }
 };
 
+// Navigation Component - FIXED
+interface NavigationProps {
+  current: string;
+  onClick: (e: { key: string }) => void;
+}
+
+const Navigation: React.FC<NavigationProps> = ({ current, onClick }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const menuItems = [
+    { key: "home", icon: Home, label: "Home" },
+    { key: "about", icon: Info, label: "About" },
+    { key: "programs", icon: Book, label: "Programs" },
+    { key: "contact", icon: Contact, label: "Contact" }
+  ];
+
+  const handleMenuClick = (key: string) => {
+    onClick({ key });
+    setIsMenuOpen(false);
+  };
+
+  return (
+    <>
+      {/* Desktop Navigation */}
+      <nav className="hidden md:flex items-center space-x-8">
+        {menuItems.map((item) => {
+          const IconComponent = item.icon;
+          return (
+            <motion.button
+              key={item.key}
+              onClick={() => handleMenuClick(item.key)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                current === item.key
+                  ? 'bg-white/20 text-white'
+                  : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <IconComponent className="w-4 h-4" />
+              <span className="font-medium">{item.label}</span>
+            </motion.button>
+          );
+        })}
+      </nav>
+
+      {/* Mobile Hamburger Button */}
+      <motion.button
+        className="md:hidden p-2 rounded-lg bg-white/10 backdrop-blur-sm"
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {isMenuOpen ? (
+          <X className="w-6 h-6 text-white" />
+        ) : (
+          <Menu className="w-6 h-6 text-white" />
+        )}
+      </motion.button>
+
+      {/* Mobile Menu Overlay - FIXED: Added fixed positioning and matching background */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 md:hidden"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="fixed right-0 top-0 h-full w-64 bg-gradient-to-br from-purple-900 to-indigo-900 shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Background elements matching hero */}
+              <div className="absolute inset-0 bg-[radial-gradient(75%_75%_at_center_center,rgb(147,113,255,.5)_15%,rgb(79,70,229,.5)_78%,transparent)]" />
+              
+              {/* Close button */}
+              <div className="absolute top-6 right-6">
+                <motion.button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-2 rounded-lg bg-white/10 backdrop-blur-sm"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <X className="w-5 h-5 text-white" />
+                </motion.button>
+              </div>
+
+              <div className="relative p-6 pt-20">
+                <nav className="space-y-4">
+                  {menuItems.map((item, index) => {
+                    const IconComponent = item.icon;
+                    return (
+                      <motion.button
+                        key={item.key}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        onClick={() => handleMenuClick(item.key)}
+                        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 backdrop-blur-sm ${
+                          current === item.key
+                            ? 'bg-white/20 text-white shadow-lg'
+                            : 'text-white/80 hover:text-white hover:bg-white/10'
+                        }`}
+                        whileHover={{ scale: 1.02, x: 5 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <IconComponent className="w-5 h-5" />
+                        <span className="font-medium">{item.label}</span>
+                      </motion.button>
+                    );
+                  })}
+                </nav>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
 // Hero Section Component
-const Hero = () => {
+interface HeroProps {
+  current: string;
+  onClick: (e: { key: string }) => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ current, onClick }) => {
   return (
     <motion.section className="relative flex h-[492px] items-center overflow-hidden bg-gradient-to-br from-purple-900 to-indigo-900 [mask-image:linear-gradient(to_bottom,transparent,black_0%,black_100%,transparent)] dark:[mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] md:h-[800px]">
+      {/* Navigation Header - FIXED: Added fixed positioning */}
+      <div className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-br from-purple-900/80 to-indigo-900/80 backdrop-blur-md border-b border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between py-6">
+            {/* Logo */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <Title level={3} className="text-2xl font-bold text-white m-0">
+                <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
+                  AI4RISE
+                </span>
+              </Title>
+            </motion.div>
+
+            {/* Navigation */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <Navigation current={current} onClick={onClick} />
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
       {/* Radial Gradient Background */}
       <div className="absolute inset-0 bg-[radial-gradient(75%_75%_at_center_center,rgb(147,113,255,.5)_15%,rgb(79,70,229,.5)_78%,transparent)]" />
 
@@ -121,7 +280,7 @@ const Hero = () => {
       </motion.div>
 
       {/* Content */}
-      <div className="container relative mt-16">
+      <div className="container relative mx-auto px-4 mt-16">
         <motion.div
           initial="hidden"
           animate="visible"
@@ -157,7 +316,7 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <motion.div variants={fadeInUp}>
-            <div className="flex justify-center space-x-4">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
               <motion.div
                 whileHover={{
                   scale: 1.05,
@@ -168,7 +327,7 @@ const Hero = () => {
                 <Button
                   type="primary"
                   size="large"
-                  className="bg-white text-purple-700 border-none font-semibold h-12 px-8 text-base hover:bg-purple-50 hover:text-purple-800"
+                  className="bg-white text-purple-700 border-none font-semibold h-12 px-8 text-base hover:bg-purple-50 hover:text-purple-800 w-full sm:w-auto"
                 >
                   Learn More
                 </Button>
@@ -183,7 +342,7 @@ const Hero = () => {
               >
                 <Button
                   size="large"
-                  className="border-white text-white bg-transparent font-semibold h-12 px-8 text-base hover:bg-white/10 hover:border-white/80"
+                  className="border-white text-white bg-transparent font-semibold h-12 px-8 text-base hover:bg-white/10 hover:border-white/80 w-full sm:w-auto"
                 >
                   Support Our Mission
                 </Button>
@@ -230,7 +389,7 @@ const WhatWeDo = () => {
   ];
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-gray-50 mt-20">
       <div className="container mx-auto px-4">
         <motion.div
           className="text-center mb-16"
@@ -297,8 +456,84 @@ const WhatWeDo = () => {
   );
 };
 
-// Mission Section
+// Circular Progress Component for Pilot Phase - NEW
+const CircularProgress = ({ steps }: { steps: Array<{ title: string; description: string; color: string }> }) => {
+  return (
+    <div className="relative w-80 h-80 mx-auto">
+      {/* Central circle */}
+      <div className="absolute inset-0 rounded-full border-4 border-gray-200 bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <Title level={4} className="text-lg font-bold text-gray-900 mb-1">
+            6 Months
+          </Title>
+          <Text className="text-gray-600 text-sm">Pilot Program</Text>
+        </div>
+      </div>
+
+      {/* Progress steps arranged in circle */}
+      {steps.map((step, index) => {
+        const angle = (index * 360) / steps.length - 90; // Start from top
+        const radian = (angle * Math.PI) / 180;
+        const radius = 140;
+        const x = Math.cos(radian) * radius;
+        const y = Math.sin(radian) * radius;
+
+        return (
+          <motion.div
+            key={index}
+            className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2"
+            style={{
+              left: `calc(50% + ${x}px)`,
+              top: `calc(50% + ${y}px)`,
+            }}
+            initial={{ scale: 0, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.2, duration: 0.5 }}
+            whileHover={{ scale: 1.1 }}
+          >
+            <div className={`w-full h-full rounded-full ${step.color} flex items-center justify-center shadow-lg border-4 border-white cursor-pointer group relative`}>
+              <CheckCircle className="w-6 h-6 text-white" />
+              
+              {/* Tooltip */}
+              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white p-2 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                <div className="font-semibold">{step.title}</div>
+                <div className="text-gray-300 text-xs max-w-32">{step.description}</div>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+              </div>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+};
+
+// Mission Section - UPDATED with circular pilot phase
 const Mission = () => {
+  const pilotSteps = [
+    {
+      title: "Curriculum Development",
+      description: "Creating materials in English & Kinyarwanda",
+      color: "bg-purple-500"
+    },
+    {
+      title: "AI Ambassador Training",
+      description: "Training 15-20 students per school",
+      color: "bg-blue-500"
+    },
+    {
+      title: "Device & Access Setup",
+      description: "Providing AI-enabled devices and connectivity",
+      color: "bg-emerald-500"
+    },
+    {
+      title: "Impact Assessment",
+      description: "Regular monitoring and evaluation",
+      color: "bg-orange-500"
+    }
+  ];
+
   return (
     <section className="py-20 bg-white">
       <div className="container mx-auto px-4">
@@ -352,51 +587,17 @@ const Mission = () => {
               viewport={{ once: true, amount: 0.3 }}
               variants={fadeInRight}
               transition={{ duration: 0.8 }}
-              whileHover={{
-                scale: 1.02,
-                y: -5
-              }}
+              className="text-center"
             >
-              <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg rounded-xl overflow-hidden">
-                <div className="text-center mb-8">
-                  <Title level={3} className="text-2xl font-bold text-gray-900 mb-4">
-                    Pilot Phase
-                  </Title>
-                  <Text className="text-gray-600">6-month program launching soon</Text>
-                </div>
-
-                <Space direction="vertical" size="middle" className="w-full">
-                  {[
-                    { color: 'bg-purple-500', text: 'Curriculum development in English & Kinyarwanda' },
-                    { color: 'bg-blue-500', text: 'Training 15-20 AI Ambassadors per school' },
-                    { color: 'bg-emerald-500', text: 'Providing AI-enabled devices and access' },
-                    { color: 'bg-orange-500', text: 'Regular monitoring and impact assessment' }
-                  ].map((item, index) => (
-                    <motion.div
-                      key={index}
-                      className="flex items-center gap-3"
-                      initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 + 0.5 }}
-                      whileHover={{ x: 5 }}
-                    >
-                      <motion.div
-                        className={`w-3 h-3 ${item.color} rounded-full`}
-                        animate={{
-                          scale: [1, 1.2, 1]
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          delay: index * 0.5
-                        }}
-                      />
-                      <Text className="text-gray-700">{item.text}</Text>
-                    </motion.div>
-                  ))}
-                </Space>
-              </Card>
+              <Title level={3} className="text-2xl font-bold text-gray-900 mb-8">
+                Pilot Phase Process
+              </Title>
+              
+              <CircularProgress steps={pilotSteps} />
+              
+              <Text className="text-gray-600 mt-6 block">
+                A comprehensive 6-month program designed for maximum impact and scalability
+              </Text>
             </motion.div>
           </Col>
         </Row>
@@ -535,52 +736,26 @@ const Footer = () => {
 
 // Main Component
 export default function AI4RISELanding() {
-  const [current, setCurrent] = React.useState('home');
+  const [current, setCurrent] = useState('home');
 
-  const onClick = (e) => {
+  const onClick = (e: { key: string }) => {
     setCurrent(e.key);
-    // Scroll to section
+    // Scroll to section with offset for fixed header
     const element = document.getElementById(e.key);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const headerHeight = 80;
+      const elementPosition = element.offsetTop - headerHeight;
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth'
+      });
     }
   };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation Menu */}
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={fadeInUp}
-        className="fixed top-0 left-0 right-0 z-50 bg-gray-900/80 backdrop-blur-md shadow-sm"
-      >
-        <div className="container mx-auto px-4">
-          <Menu 
-            onClick={onClick} 
-            selectedKeys={[current]} 
-            mode="horizontal" 
-            className="bg-transparent border-b-0"
-            style={{ lineHeight: '64px' }}
-          >
-            <Menu.Item key="home" icon={<Home className="w-5 h-5" />} className="text-white hover:text-purple-300">
-              Home
-            </Menu.Item>
-            <Menu.Item key="about" icon={<Info className="w-5 h-5" />} className="text-white hover:text-purple-300">
-              About
-            </Menu.Item>
-            <Menu.Item key="programs" icon={<Book className="w-5 h-5" />} className="text-white hover:text-purple-300">
-              Programs
-            </Menu.Item>
-            <Menu.Item key="contact" icon={<Contact className="w-5 h-5" />} className="text-white hover:text-purple-300">
-              Contact
-            </Menu.Item>
-          </Menu>
-        </div>
-      </motion.div>
-
       <div id="home">
-        <Hero />
+        <Hero current={current} onClick={onClick} />
       </div>
       <div id="about">
         <WhatWeDo />
