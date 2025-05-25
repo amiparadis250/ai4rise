@@ -18,8 +18,7 @@ import {
   Book,
   Contact,
   Menu,
-  X,
-  CheckCircle
+  X
 } from 'lucide-react';
 
 const { Title, Paragraph, Text } = Typography;
@@ -40,6 +39,11 @@ const fadeInRight = {
   visible: { opacity: 1, x: 0 }
 };
 
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: { opacity: 1, scale: 1 }
+};
+
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
@@ -51,13 +55,8 @@ const staggerContainer = {
   }
 };
 
-// Navigation Component - FIXED
-interface NavigationProps {
-  current: string;
-  onClick: (e: { key: string }) => void;
-}
-
-const Navigation: React.FC<NavigationProps> = ({ current, onClick }) => {
+// Navigation Component
+const Navigation = ({ current, onClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
@@ -67,7 +66,7 @@ const Navigation: React.FC<NavigationProps> = ({ current, onClick }) => {
     { key: "contact", icon: Contact, label: "Contact" }
   ];
 
-  const handleMenuClick = (key: string) => {
+  const handleMenuClick = (key) => {
     onClick({ key });
     setIsMenuOpen(false);
   };
@@ -75,7 +74,7 @@ const Navigation: React.FC<NavigationProps> = ({ current, onClick }) => {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex items-center space-x-8">
+      <nav className="hidden md:flex items-center space-x-8 ">
         {menuItems.map((item) => {
           const IconComponent = item.icon;
           return (
@@ -111,40 +110,25 @@ const Navigation: React.FC<NavigationProps> = ({ current, onClick }) => {
         )}
       </motion.button>
 
-      {/* Mobile Menu Overlay - FIXED: Added fixed positioning and matching background */}
+      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 md:hidden"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
             onClick={() => setIsMenuOpen(false)}
           >
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="fixed right-0 top-0 h-full w-64 bg-gradient-to-br from-purple-900 to-indigo-900 shadow-2xl overflow-hidden"
+              transition={{ type: "spring", damping: 20 }}
+              className="absolute right-0 top-0 h-full w-64 bg-gradient-to-b from-purple-900 to-indigo-900 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Background elements matching hero */}
-              <div className="absolute inset-0 bg-[radial-gradient(75%_75%_at_center_center,rgb(147,113,255,.5)_15%,rgb(79,70,229,.5)_78%,transparent)]" />
-              
-              {/* Close button */}
-              <div className="absolute top-6 right-6">
-                <motion.button
-                  onClick={() => setIsMenuOpen(false)}
-                  className="p-2 rounded-lg bg-white/10 backdrop-blur-sm"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <X className="w-5 h-5 text-white" />
-                </motion.button>
-              </div>
-
-              <div className="relative p-6 pt-20">
+              <div className="p-6 pt-20">
                 <nav className="space-y-4">
                   {menuItems.map((item, index) => {
                     const IconComponent = item.icon;
@@ -155,13 +139,11 @@ const Navigation: React.FC<NavigationProps> = ({ current, onClick }) => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
                         onClick={() => handleMenuClick(item.key)}
-                        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 backdrop-blur-sm ${
+                        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
                           current === item.key
-                            ? 'bg-white/20 text-white shadow-lg'
+                            ? 'bg-white/20 text-white'
                             : 'text-white/80 hover:text-white hover:bg-white/10'
                         }`}
-                        whileHover={{ scale: 1.02, x: 5 }}
-                        whileTap={{ scale: 0.98 }}
                       >
                         <IconComponent className="w-5 h-5" />
                         <span className="font-medium">{item.label}</span>
@@ -179,16 +161,11 @@ const Navigation: React.FC<NavigationProps> = ({ current, onClick }) => {
 };
 
 // Hero Section Component
-interface HeroProps {
-  current: string;
-  onClick: (e: { key: string }) => void;
-}
-
-const Hero: React.FC<HeroProps> = ({ current, onClick }) => {
+const Hero = ({ current, onClick }) => {
   return (
     <motion.section className="relative flex h-[492px] items-center overflow-hidden bg-gradient-to-br from-purple-900 to-indigo-900 [mask-image:linear-gradient(to_bottom,transparent,black_0%,black_100%,transparent)] dark:[mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] md:h-[800px]">
-      {/* Navigation Header - FIXED: Added fixed positioning */}
-      <div className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-br from-purple-900/80 to-indigo-900/80 backdrop-blur-md border-b border-white/10">
+      {/* Navigation Header */}
+      <div className="absolute top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-6">
             {/* Logo */}
@@ -389,7 +366,7 @@ const WhatWeDo = () => {
   ];
 
   return (
-    <section className="py-20 bg-gray-50 mt-20">
+    <section className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <motion.div
           className="text-center mb-16"
@@ -456,84 +433,8 @@ const WhatWeDo = () => {
   );
 };
 
-// Circular Progress Component for Pilot Phase - NEW
-const CircularProgress = ({ steps }: { steps: Array<{ title: string; description: string; color: string }> }) => {
-  return (
-    <div className="relative w-80 h-80 mx-auto">
-      {/* Central circle */}
-      <div className="absolute inset-0 rounded-full border-4 border-gray-200 bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <Title level={4} className="text-lg font-bold text-gray-900 mb-1">
-            6 Months
-          </Title>
-          <Text className="text-gray-600 text-sm">Pilot Program</Text>
-        </div>
-      </div>
-
-      {/* Progress steps arranged in circle */}
-      {steps.map((step, index) => {
-        const angle = (index * 360) / steps.length - 90; // Start from top
-        const radian = (angle * Math.PI) / 180;
-        const radius = 140;
-        const x = Math.cos(radian) * radius;
-        const y = Math.sin(radian) * radius;
-
-        return (
-          <motion.div
-            key={index}
-            className="absolute w-16 h-16 -translate-x-1/2 -translate-y-1/2"
-            style={{
-              left: `calc(50% + ${x}px)`,
-              top: `calc(50% + ${y}px)`,
-            }}
-            initial={{ scale: 0, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.2, duration: 0.5 }}
-            whileHover={{ scale: 1.1 }}
-          >
-            <div className={`w-full h-full rounded-full ${step.color} flex items-center justify-center shadow-lg border-4 border-white cursor-pointer group relative`}>
-              <CheckCircle className="w-6 h-6 text-white" />
-              
-              {/* Tooltip */}
-              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white p-2 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                <div className="font-semibold">{step.title}</div>
-                <div className="text-gray-300 text-xs max-w-32">{step.description}</div>
-                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-              </div>
-            </div>
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-};
-
-// Mission Section - UPDATED with circular pilot phase
+// Mission Section
 const Mission = () => {
-  const pilotSteps = [
-    {
-      title: "Curriculum Development",
-      description: "Creating materials in English & Kinyarwanda",
-      color: "bg-purple-500"
-    },
-    {
-      title: "AI Ambassador Training",
-      description: "Training 15-20 students per school",
-      color: "bg-blue-500"
-    },
-    {
-      title: "Device & Access Setup",
-      description: "Providing AI-enabled devices and connectivity",
-      color: "bg-emerald-500"
-    },
-    {
-      title: "Impact Assessment",
-      description: "Regular monitoring and evaluation",
-      color: "bg-orange-500"
-    }
-  ];
-
   return (
     <section className="py-20 bg-white">
       <div className="container mx-auto px-4">
@@ -587,17 +488,51 @@ const Mission = () => {
               viewport={{ once: true, amount: 0.3 }}
               variants={fadeInRight}
               transition={{ duration: 0.8 }}
-              className="text-center"
+              whileHover={{
+                scale: 1.02,
+                y: -5
+              }}
             >
-              <Title level={3} className="text-2xl font-bold text-gray-900 mb-8">
-                Pilot Phase Process
-              </Title>
-              
-              <CircularProgress steps={pilotSteps} />
-              
-              <Text className="text-gray-600 mt-6 block">
-                A comprehensive 6-month program designed for maximum impact and scalability
-              </Text>
+              <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg rounded-xl overflow-hidden">
+                <div className="text-center mb-8">
+                  <Title level={3} className="text-2xl font-bold text-gray-900 mb-4">
+                    Pilot Phase
+                  </Title>
+                  <Text className="text-gray-600">6-month program launching soon</Text>
+                </div>
+
+                <Space direction="vertical" size="middle" className="w-full">
+                  {[
+                    { color: 'bg-purple-500', text: 'Curriculum development in English & Kinyarwanda' },
+                    { color: 'bg-blue-500', text: 'Training 15-20 AI Ambassadors per school' },
+                    { color: 'bg-emerald-500', text: 'Providing AI-enabled devices and access' },
+                    { color: 'bg-orange-500', text: 'Regular monitoring and impact assessment' }
+                  ].map((item, index) => (
+                    <motion.div
+                      key={index}
+                      className="flex items-center gap-3"
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 + 0.5 }}
+                      whileHover={{ x: 5 }}
+                    >
+                      <motion.div
+                        className={`w-3 h-3 ${item.color} rounded-full`}
+                        animate={{
+                          scale: [1, 1.2, 1]
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: index * 0.5
+                        }}
+                      />
+                      <Text className="text-gray-700">{item.text}</Text>
+                    </motion.div>
+                  ))}
+                </Space>
+              </Card>
             </motion.div>
           </Col>
         </Row>
@@ -608,147 +543,91 @@ const Mission = () => {
 
 // Footer Section
 const Footer = () => {
-  const socialLinks = [
-    { icon: <Linkedin className="w-5 h-5" />, url: "https://linkedin.com" },
-    { icon: <Twitter className="w-5 h-5" />, url: "https://twitter.com" },
-    { icon: <Facebook className="w-5 h-5" />, url: "https://facebook.com" }
-  ];
-
-  const footerLinks = [
-    { title: "About", links: ["Our Story", "Team", "Partners", "Impact"] },
-    { title: "Programs", links: ["AI Literacy", "Teacher Training", "Student Ambassadors"] },
-    { title: "Get Involved", links: ["Donate", "Volunteer", "Partner With Us"] }
-  ];
-
   return (
-    <footer className="bg-gray-900 text-white pt-16 pb-8">
+    <footer className="bg-gray-900 text-white py-12">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={staggerContainer}
-        >
-          <Row gutter={[48, 48]}>
-            <Col xs={24} md={8}>
-              <motion.div variants={fadeInUp}>
-                <Title level={3} className="text-2xl font-bold mb-6 text-white flex items-center">
-                  <span className="bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
-                    AI4RISE
-                  </span>
-                </Title>
-                <Paragraph className="text-gray-300 mb-6 leading-relaxed">
-                  Empowering rural Rwanda through AI literacy and digital skills education.
-                </Paragraph>
-                <div className="flex space-x-4 mb-6">
-                  {socialLinks.map((social, index) => (
-                    <motion.a
-                      key={index}
-                      href={social.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors"
-                      whileHover={{ scale: 1.1, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {social.icon}
-                    </motion.a>
-                  ))}
-                </div>
-                <Text className="text-sm text-gray-400">
-                  © {new Date().getFullYear()} AI4RISE. All rights reserved.
-                </Text>
-              </motion.div>
-            </Col>
+        <div className="grid md:grid-cols-3 gap-8">
+          <div>
+            <h3 className="text-2xl font-bold mb-4">AI4RISE</h3>
+            <p className="text-gray-300 mb-4">
+              Empowering rural Rwanda through AI literacy and digital skills education.
+            </p>
+            <p className="text-sm text-gray-400">
+              Founded by a university student passionate about bridging the digital divide.
+            </p>
+          </div>
 
-            {footerLinks.map((section, index) => (
-              <Col xs={24} md={5} key={index}>
-                <motion.div variants={fadeInUp} transition={{ delay: index * 0.1 }}>
-                  <Title level={4} className="text-lg font-semibold mb-6 text-white">
-                    {section.title}
-                  </Title>
-                  <Space direction="vertical" size="middle" className="w-full">
-                    {section.links.map((link, linkIndex) => (
-                      <motion.a
-                        key={linkIndex}
-                        href="#"
-                        className="text-gray-300 hover:text-purple-400 transition-colors block"
-                        whileHover={{ x: 5 }}
-                      >
-                        {link}
-                      </motion.a>
-                    ))}
-                  </Space>
-                </motion.div>
-              </Col>
-            ))}
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Contact</h4>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-green-400" />
+                <a
+                  href="mailto:dushimezar2003@gmail.com"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  dushimezar2003@gmail.com
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone className="w-5 h-5 text-green-400" />
+                <span className="text-gray-300">+39 351 366 1846</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <MapPin className="w-5 h-5 text-green-400" />
+                <span className="text-gray-300">Rwanda</span>
+              </div>
+            </div>
+          </div>
 
-            <Col xs={24} md={6}>
-              <motion.div variants={fadeInUp} transition={{ delay: 0.3 }}>
-                <Title level={4} className="text-lg font-semibold mb-6 text-white">
-                  Contact Us
-                </Title>
-                <Space direction="vertical" size="middle" className="w-full">
-                  <motion.div
-                    className="flex items-center gap-3"
-                    whileHover={{ x: 5 }}
-                  >
-                    <Mail className="w-5 h-5 text-purple-400" />
-                    <a
-                      href="mailto:dushimezar2003@gmail.com"
-                      className="text-gray-300 hover:text-white transition-colors"
-                    >
-                      dushimezar2003@gmail.com
-                    </a>
-                  </motion.div>
-                  <motion.div
-                    className="flex items-center gap-3"
-                    whileHover={{ x: 5 }}
-                  >
-                    <Phone className="w-5 h-5 text-purple-400" />
-                    <Text className="text-gray-300">+39 351 366 1846</Text>
-                  </motion.div>
-                  <motion.div
-                    className="mt-4 pt-4 border-t border-gray-800"
-                    whileHover={{ x: 5 }}
-                  >
-                    <Text className="text-sm text-gray-400 mb-2 block">Founder</Text>
-                    <Text className="text-gray-300 font-medium">Cesar DUSHIMIMANA</Text>
-                  </motion.div>
-                </Space>
-              </motion.div>
-            </Col>
-          </Row>
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
+            <div className="flex gap-4">
+              <a
+                href="#"
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors"
+              >
+                <Linkedin className="w-5 h-5" />
+              </a>
+              <a
+                href="#"
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-400 transition-colors"
+              >
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a
+                href="#"
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
+              >
+                <Facebook className="w-5 h-5" />
+              </a>
+            </div>
+            <div className="mt-6">
+              <p className="text-sm text-gray-400 mb-2">Founder</p>
+              <p className="text-gray-300 font-medium">Cesar DUSHIMIMANA</p>
+            </div>
+          </div>
+        </div>
 
-          <motion.div
-            className="border-t border-gray-800 mt-12 pt-8 text-center"
-            variants={fadeInUp}
-          >
-            <Text className="text-gray-400 text-sm">
-              Making AI accessible for everyone. Based in Rwanda with global impact.
-            </Text>
-          </motion.div>
-        </motion.div>
+        <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+          <p className="text-gray-400">© 2025 AI4RISE. All rights reserved. Making AI accessible for everyone.</p>
+        </div>
       </div>
     </footer>
   );
-};
+}
+
 
 // Main Component
 export default function AI4RISELanding() {
   const [current, setCurrent] = useState('home');
 
-  const onClick = (e: { key: string }) => {
+  const onClick = (e) => {
     setCurrent(e.key);
-    // Scroll to section with offset for fixed header
+    // Scroll to section
     const element = document.getElementById(e.key);
     if (element) {
-      const headerHeight = 80;
-      const elementPosition = element.offsetTop - headerHeight;
-      window.scrollTo({
-        top: elementPosition,
-        behavior: 'smooth'
-      });
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
